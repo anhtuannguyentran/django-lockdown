@@ -49,6 +49,7 @@ class LockdownMiddleware(object):
     def __init__(self, get_response=None, form=None, until_date=None,
                  after_date=None, logout_key=None, session_key=None,
                  url_exceptions=None, view_exceptions=None,
+                 locked_urls=None, locked_views=None,
                  remote_addr_exceptions=None, trusted_proxies=None,
                  extra_context=None, **form_kwargs):
         """Initialize the middleware, by setting the configuration values."""
@@ -64,6 +65,9 @@ class LockdownMiddleware(object):
         self.logout_key = logout_key
         self.session_key = session_key
         self.url_exceptions = url_exceptions
+        self.view_exceptions = view_exceptions
+        self.locked_urls = locked_urls
+        self.locked_views = locked_views
         self.remote_addr_exceptions = remote_addr_exceptions
         self.trusted_proxies = trusted_proxies
         self.extra_context = extra_context
@@ -194,6 +198,19 @@ class LockdownMiddleware(object):
                 token = True
             session[self.session_key] = token
             return self.redirect(request)
+
+        # Only lock down if the URL matches an exception pattern.
+        locked_url_detected = False
+        if self.locked_urls:
+            locked_urls = compile_url_exceptions(self.locked_urls)
+        else:
+            locked_urls = compile_url_exceptions(settings.LOCKED_URLS)
+        for pattern in locked_urls:
+            if pattern.search(request.path):
+                locked_url_detected = True
+
+        if not locked_url_detected:
+            return None
 
         page_data = {'until_date': until_date, 'after_date': after_date}
         if not hasattr(form, 'show_form') or form.show_form():

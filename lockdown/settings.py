@@ -1,6 +1,8 @@
 from django.conf import settings
 
 ENABLED = getattr(settings, 'LOCKDOWN_ENABLED', True)
+LOCKED_URLS = getattr(settings, 'LOCKDOWN_LOCKED_URLS', ())
+LOCKED_VIEWS = getattr(settings, 'LOCKDOWN_LOCKED_VIEWS', ())
 URL_EXCEPTIONS = getattr(settings, 'LOCKDOWN_URL_EXCEPTIONS', ())
 VIEW_EXCEPTIONS = getattr(settings, 'LOCKDOWN_VIEW_EXCEPTIONS', [])
 REMOTE_ADDR_EXCEPTIONS = getattr(settings, 'LOCKDOWN_REMOTE_ADDR_EXCEPTIONS',
